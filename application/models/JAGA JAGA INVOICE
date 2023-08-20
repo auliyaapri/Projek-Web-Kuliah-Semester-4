@@ -1,0 +1,238 @@
+<?php
+class Model_invoice extends CI_Model
+{
+    public function get_keyword_invoice($keyword)
+    {
+        $this->db->select('*');
+        $this->db->from('tb_invoice');
+        $this->db->like('nama', $keyword);
+        $this->db->or_like('tanggal_pesan', $keyword);
+        return $this->db->get()->result();
+    }
+    public function data_invoice()
+    {
+        $this->db->select('*');
+        $this->db->from('tb_invoice');
+        return $this->db->get();
+    }
+
+    public function index()
+    {
+        date_default_timezone_set('Asia/Jakarta');
+        $nama = $this->input->post('nama');
+        $username = $this->input->post('username');
+        $email = $this->input->post('email');
+        $alamat = $this->input->post('alamat');
+        $nomor_hp = $this->input->post('nomor_hp');
+        $metode_bayar = $this->input->post('metode_bayar');
+        $jasa = $this->input->post('jasa');
+
+        // Dimasukkan kedalam array        
+        $invoice = array(
+            'nama'          => $nama,
+            'username'          => $username,
+            'email'          => $email,
+            'nomor_hp'          => $nomor_hp,
+            'metode_bayar'          => $metode_bayar,
+            'alamat'        => $alamat,
+            'jasa'        => $jasa,
+            'tanggal_pesan'     => date('Y-m-d H:i:s')
+        );
+        $this->db->insert('tb_invoice', $invoice);
+        $id_invoice = $this->db->insert_id();
+
+        // untuk table pesanan
+        foreach ($this->cart->contents() as $items) {
+            $data = array(
+                'id_invoice'        => $id_invoice,
+                'id_produk'         => $items['id'],
+                'nama_produk'       => $items['name'],
+                'jumlah'            => $items['qty'],
+                'harga'             => $items['price'],
+            );
+            $this->db->insert('tb_pesanan', $data);
+        }
+        return TRUE;
+    }
+
+    // ============================= Menampilkan Data Harian =============================
+    public function tampil_data_harian($limit, $start)
+    {
+        $tanggal_sekarang = date('Y-m-d');
+        $this->db->where('tanggal_pesan', $tanggal_sekarang);
+        return $this->db->get('tb_invoice', $limit, $start);
+    }
+    public function hitung_data_harian()
+    {
+        $tanggal_sekarang = date('Y-m-d');
+        $this->db->where('tanggal_pesan', $tanggal_sekarang);
+        return $this->db->get('tb_invoice')->num_rows();
+    }
+    public function data_invoice_harian()
+    {
+        $tanggal_sekarang = date('Y-m-d');
+        $this->db->select('*');
+        $this->db->from('tb_invoice');
+        $this->db->where('tanggal_pesan', $tanggal_sekarang);
+        return $this->db->get();
+    }
+    // ============================= Menampilkan Data Harian =============================
+
+
+    // ============================= Menampilkan Data Perminggu =============================
+    public function tampil_data_minggu($limit, $start, $tanggal_awal_minggu, $tanggal_akhir_minggu)
+    {
+        $this->db->where('tanggal_pesan >=', $tanggal_awal_minggu);
+        $this->db->where('tanggal_pesan <=', $tanggal_akhir_minggu);
+        return $this->db->get('tb_invoice', $limit, $start);
+    }
+
+    public function hitung_data_minggu()
+    {
+        $tanggal_sekarang = date('Y-m-d');
+        $tanggal_awal_minggu = date('Y-m-d', strtotime('last Sunday', strtotime($tanggal_sekarang)));
+        $tanggal_akhir_minggu = date('Y-m-d', strtotime('next Saturday', strtotime($tanggal_sekarang)));
+
+        $this->db->where('tanggal_pesan >=', $tanggal_awal_minggu);
+        $this->db->where('tanggal_pesan <=', $tanggal_akhir_minggu);
+        return $this->db->get('tb_invoice')->num_rows();
+    }
+
+    public function data_invoice_minggu($tanggal_awal_minggu, $tanggal_akhir_minggu)
+    {
+        $this->db->select('*');
+        $this->db->from('tb_invoice');
+        $this->db->where('tanggal_pesan >=', $tanggal_awal_minggu);
+        $this->db->where('tanggal_pesan <=', $tanggal_akhir_minggu);
+        return $this->db->get();
+    }
+
+    public function get_invoice_by_date($date)
+    {
+        $this->db->select('*');
+        $this->db->from('tb_invoice');
+        $this->db->where('tanggal_pesan >=', $date);
+        $this->db->where('tanggal_pesan <=', date('Y-m-d', strtotime($date . ' + 7 days')));
+        return $this->db->get()->result();
+    }
+    // ============================= Menampilkan Data Perminggu =============================
+
+    // ============================= Menampilkan Data Perbulan =============================
+    public function tampil_data_bulan($limit, $start, $bulan)
+    {
+        $this->db->select('*');
+        $this->db->from('tb_invoice');
+        $this->db->where('MONTH(tanggal_pesan)', $bulan);
+        $this->db->limit($limit, $start);
+        return $this->db->get();
+    }
+
+    public function hitung_data_bulan($bulan)
+    {
+        $this->db->select('*');
+        $this->db->from('tb_invoice');
+        $this->db->where('MONTH(tanggal_pesan)', $bulan);
+        return $this->db->get()->num_rows();
+    }
+
+    public function data_invoice_bulan()
+    {
+        return $this->db->get('tb_invoice');
+    }
+    // ============================= Menampilkan Data Perbulan =============================
+
+
+    public function tampil_data($limit, $start)
+    {
+        return $this->db->get('tb_invoice', $limit, $start);
+    }
+    public function hitung_data()
+    {
+        return $this->db->get('tb_invoice')->num_rows();
+    }
+    public function tampil_invoiceUsername($id_invoice)
+    {
+        $this->db->select('*');
+        $this->db->from('tb_invoice');
+        // $this->db->join('tb_booking', 'tb_booking.username = tb_invoice.username');
+        $this->db->where('tb_invoice.username', $id_invoice);
+        $query = $this->db->get();
+
+        return $query;
+    }
+    public function tampil_invoiceUsernameGabung($id_invoice)
+    {
+        $this->db->select('*');
+        $this->db->from('tb_booking');
+        // $this->db->join('tb_booking', 'tb_booking.username = tb_invoice.username');
+        $this->db->where('tb_booking.username', $id_invoice);
+        $query = $this->db->get();
+
+        return $query;
+    }
+
+    public function ambil_id_invoice($id_invoice)
+    {
+        // $result = $this->db->where('id', $id_invoice)->limit(1)->get('tb_invoice');
+        $result = $this->db->where('id_invoice', $id_invoice)->limit(1)->get('tb_invoice');
+        if ($result->num_rows() > 0) {
+            return $result->row();
+        } else {
+            return false;
+        }
+    }
+    public function ambil_id_pesanan($id_invoice)
+    {
+        $result = $this->db->where('id_invoice', $id_invoice)->get('tb_pesanan');
+        if ($result->num_rows() > 0) {
+            return $result->result();
+        } else {
+            return false;
+        }
+    }
+    // ============== START USER ==============
+    public function ambil_id_invoiceUser($id_invoice)
+    {
+        $result = $this->db->where('id_invoice', $id_invoice)->limit(1)->get('tb_invoice');
+        if ($result->num_rows() > 0) {
+            return $result->row();
+        } else {
+            return false;
+        }
+    }
+    public function ambil_id_pesananUser($id_invoice)
+    {
+        $result = $this->db->where('tb_pesanan.id_invoice', $id_invoice)->join('tb_invoice', 'tb_invoice.id_invoice = tb_pesanan.id_invoice')->get('tb_pesanan');
+        if ($result->num_rows() > 0) {
+            return $result->result();
+        } else {
+            return false;
+        }
+    }
+    // ============== START USER ==============
+
+    // ============== ID USER PADA BOOKING ==============
+    public function ambil_id_invoiceUserBooking($id)
+    {
+        $result = $this->db->where('id', $id)->limit(1)->get('tb_booking');
+        if ($result->num_rows() > 0) {
+            return $result->row();
+        } else {
+            return false;
+        }
+    }
+
+    public function ambil_id_pesananUserBooking($id)
+    {
+        // $result = $this->db->where('tb_booking.id', $id)->join('tb_invoice', 'tb_invoice.id = tb_pesanan.id')->get('tb_pesanan');
+        $result = $this->db->where('tb_booking.id', $id)->get('tb_booking');
+        if ($result->num_rows() > 0) {
+            return $result->result();
+        } else {
+            return false;
+        }
+    }
+    
+    // ============== ID USER PADA BOOKING ==============
+
+}
