@@ -16,5 +16,5 @@ https://www.youtube.com/watch?v=wdxuAd8G5-I
 ## 🚀 Tech Stack Used
 - HTML, CSS , Javascript
 - Bootstrap
-- CodeIgniter 3
+- PHP, CodeIgniter 3
 
