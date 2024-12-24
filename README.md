@@ -5,7 +5,7 @@ Dalam proyek ini, saya mengembangkan sebuah website toko online dengan melakukan
 ## 💻 Demo Website
 ![kopi kila github](https://github.com/user-attachments/assets/e9177316-aa35-4817-85b3-51d9a6f7fd37)
 
-[![Tonton di YouTube](https://img.shields.io/badge/Tonton%20di%20YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)]([https://www.youtube.com/watch?v=zfqBxEmlhbI&t=5s](https://www.youtube.com/watch?v=wdxuAd8G5-I))
+[![Tonton di YouTube](https://img.shields.io/badge/Tonton%20di%20YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/watch?v=zfqBxEmlhbI))
 
 ## 🚀 Tech Stack Used
 - HTML, CSS, Javascript
